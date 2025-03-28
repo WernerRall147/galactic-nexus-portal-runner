@@ -1,5 +1,5 @@
 import * as THREE from 'https://esm.sh/three';
-import { createRacingScene } from './racingWorld.js';
+import { createMagicScene } from './magicWorld.js';
 
 let currentScene = "nexus";
 
@@ -12,8 +12,10 @@ camera.position.set(0, 2, 5);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.innerHTML = ''; // Clears previous elements
+document.body.innerHTML = '';
 document.body.appendChild(renderer.domElement);
+
+createMagicScene(renderer);
 
 // Lighting setup
 scene.add(new THREE.AmbientLight(0xffffff, 0.5));
