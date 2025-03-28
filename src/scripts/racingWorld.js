@@ -1,5 +1,7 @@
 import * as THREE from 'https://esm.sh/three';
 
+let lapCompleted = false; // Clearly place this at the top
+
 export function createRacingScene(renderer) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000022);
@@ -35,9 +37,9 @@ export function createRacingScene(renderer) {
 
   // Neon oval racetrack
   const trackShape = new THREE.Shape();
-  trackShape.absellipse(0, 0, 15, 8, 0, Math.PI * 2, false, 0);
+  trackShape.absellipse(0, 0, 45, 24, 0, Math.PI * 2, false, 0);
   const holeShape = new THREE.Shape();
-  holeShape.absellipse(0, 0, 13, 6, 0, Math.PI * 2, true, 0);
+  holeShape.absellipse(0, 0, 42, 21, 0, Math.PI * 2, true, 0);
   trackShape.holes.push(holeShape);
 
   const trackGeometry = new THREE.ExtrudeGeometry(trackShape, { depth: 0.2, bevelEnabled: false });
@@ -104,10 +106,10 @@ export function createRacingScene(renderer) {
 
   // Checkpoints
   const checkpoints = [
-    new THREE.Vector3(0, 0, -10),
-    new THREE.Vector3(10, 0, 0),
-    new THREE.Vector3(0, 0, 10),
-    new THREE.Vector3(-10, 0, 0)
+    new THREE.Vector3(0, 0, -30),
+    new THREE.Vector3(30, 0, 0),
+    new THREE.Vector3(0, 0, 30),
+    new THREE.Vector3(-30, 0, 0)
   ];
 
   let checkpointIndex = 0;
@@ -123,11 +125,21 @@ export function createRacingScene(renderer) {
   });
 
   function checkCheckpoint() {
-    if (vehicle.position.distanceTo(checkpoints[checkpointIndex]) < 2) {
+    const distance = vehicle.position.distanceTo(checkpoints[checkpointIndex]);
+    if (distance < 2) {
       checkpointIndex = (checkpointIndex + 1) % checkpoints.length;
-      if (checkpointIndex === 0) {
-        alert(`🎉 Lap Completed! Time: ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
-        startTime = Date.now();
+      if (checkpointIndex === 0 && !lapCompleted) {
+        lapCompleted = true; // clearly prevent multiple triggers
+        const lapTime = ((Date.now() - startTime) / 1000).toFixed(2);
+        alert(`🎉 Lap Completed! Time: ${lapTime}s`);
+  
+        // Clearly reset keys to avoid sticky controls
+        for (const key in keysPressed) {
+          keysPressed[key] = false;
+        }
+  
+        startTime = Date.now();  // reset timer for the next lap
+        setTimeout(() => { lapCompleted = false; }, 1000); // allow subsequent laps clearly
       }
     }
   }

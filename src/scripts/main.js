@@ -1,5 +1,7 @@
 import * as THREE from 'https://esm.sh/three';
 import { createCombatScene } from './combatWorld.js';
+import { createRacingScene } from './racingWorld.js';
+import { createMagicScene } from './magicWorld.js';
 
 let currentScene = "nexus";
 
@@ -14,8 +16,6 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.innerHTML = '';
 document.body.appendChild(renderer.domElement);
-
-createCombatScene(renderer);
 
 // Lighting setup
 scene.add(new THREE.AmbientLight(0xffffff, 0.5));
@@ -53,7 +53,7 @@ const centralArtifact = new THREE.Mesh(
 centralArtifact.position.y = 1.2;
 scene.add(centralArtifact);
 
-// Portal creation
+// Portals setup
 const portals = [];
 function createPortal(color, x, z, label, worldName) {
   const portal = new THREE.Mesh(
@@ -64,7 +64,6 @@ function createPortal(color, x, z, label, worldName) {
   portal.rotation.x = Math.PI / 2;
   scene.add(portal);
 
-  // Label
   const canvas = document.createElement('canvas');
   canvas.width = 256; canvas.height = 64;
   const ctx = canvas.getContext('2d');
@@ -80,7 +79,6 @@ function createPortal(color, x, z, label, worldName) {
   portals.push({ mesh: portal, color, world: worldName });
 }
 
-// Only create each portal once clearly
 createPortal(0xff5555, -3, -3, "🏎️ Racing World", "racing");
 createPortal(0x55ff55, 0, -4, "✨ Magic/Puzzle World", "magic");
 createPortal(0x5555ff, 3, -3, "⚔️ Combat World", "combat");
@@ -94,8 +92,12 @@ function checkPortalCollision() {
   portals.forEach(portal => {
     if (player.position.distanceTo(portal.mesh.position) < 1) {
       portal.mesh.material.emissive.setHex(0xffffff);
-      if (portal.world === "racing" && currentScene === "nexus") {
-        switchToRacingWorld();
+      if (currentScene === "nexus") {
+        switch (portal.world) {
+          case "racing": switchToRacingWorld(); break;
+          case "magic": switchToMagicWorld(); break;
+          case "combat": switchToCombatWorld(); break;
+        }
       }
     } else {
       portal.mesh.material.emissive.setHex(portal.color);
@@ -109,33 +111,59 @@ function updatePlayer() {
   if (keysPressed['a'] || keysPressed['ArrowLeft']) player.position.x -= 0.05;
   if (keysPressed['d'] || keysPressed['ArrowRight']) player.position.x += 0.05;
 
-  camera.position.x = player.position.x;
-  camera.position.z = player.position.z + 5;
+  camera.position.set(player.position.x, player.position.y + 5, player.position.z + 5);
   camera.lookAt(player.position);
   checkPortalCollision();
+  checkVibeversePortal();
 }
 
 function rotateArtifact() {
   centralArtifact.rotation.y += 0.005;
 }
 
-// Animation loop
+const vibeversePortal = new THREE.Mesh(
+  new THREE.TorusGeometry(1.2, 0.2, 16, 100),
+  new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xcccccc })
+);
+vibeversePortal.position.set(0, 1, 6);
+vibeversePortal.rotation.x = Math.PI / 2;
+scene.add(vibeversePortal);
+
+function checkVibeversePortal() {
+  if (player.position.distanceTo(vibeversePortal.position) < 1.5) {
+    window.location.href = "http://portal.pieter.com?portal=true&username=player&color=blue&speed=0.1&ref=galactic-nexus.yourdomain.com";
+  }
+}
+
 function animate() {
   if (currentScene === "nexus") {
+    requestAnimationFrame(animate);
     updatePlayer();
     rotateArtifact();
     renderer.render(scene, camera);
-    requestAnimationFrame(animate);
   }
 }
 
 animate();
 
-// Switch to Racing World
+// Scene switching functions
 function switchToRacingWorld() {
   currentScene = "racing";
   document.body.innerHTML = '';
-  renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
   createRacingScene(renderer);
+}
+
+function switchToMagicWorld() {
+  currentScene = "magic";
+  document.body.innerHTML = '';
+  document.body.appendChild(renderer.domElement);
+  createMagicScene(renderer);
+}
+
+function switchToCombatWorld() {
+  currentScene = "combat";
+  document.body.innerHTML = '';
+  document.body.appendChild(renderer.domElement);
+  createCombatScene(renderer);
 }

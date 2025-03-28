@@ -1,5 +1,7 @@
 import * as THREE from 'https://esm.sh/three';
 
+let artifactCollected = false; // Clearly place this at the top
+
 export function createCombatScene(renderer) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x222211);
@@ -91,8 +93,15 @@ function spawnArtifact() {
 
 function checkArtifactCollection() {
   const artifact = scene.getObjectByName('artifact');
-  if (artifact && player.position.distanceTo(artifact.position) < 1.5) {
+  if (!artifactCollected && artifact && player.position.distanceTo(artifact.position) < 1.5) {
+    artifactCollected = true;
     alert('✨ Artifact Collected! Return to Nexus.');
+
+    // Clearly reset keys to avoid sticky controls
+    for (const key in keysPressed) {
+      keysPressed[key] = false;
+    }
+
     artifact.material.color.setHex(0xffffff);
     artifact.material.emissive.setHex(0xffffff);
   }

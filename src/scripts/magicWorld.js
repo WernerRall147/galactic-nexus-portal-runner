@@ -1,5 +1,8 @@
 import * as THREE from 'https://esm.sh/three';
 
+// Check Artifact Collection
+  let artifactCollected = false; // add clearly at the top with your other variables
+
 export function createMagicScene(renderer) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x110022);
@@ -94,16 +97,24 @@ function spawnArtifact() {
     artifact.name = 'artifact';
     scene.add(artifact);
   }
-  
-  // Check Artifact Collection
-function checkArtifact() {
+
+  // Optimized artifact check
+  function checkArtifact() {
     const artifact = scene.getObjectByName('artifact');
-    if (artifact && player.position.distanceTo(artifact.position) < 1.5) {
+    if (!artifactCollected && artifact && player.position.distanceTo(artifact.position) < 1.5) {
+      artifactCollected = true;
       alert('✨ Artifact Collected! Return to Nexus.');
+  
+      // Immediately reset all keys to prevent sticky movement clearly
+      for (const key in keysPressed) {
+        keysPressed[key] = false;
+      }
+  
       artifact.material.color.setHex(0xffffff);
       artifact.material.emissive.setHex(0xffffff);
     }
   }
+  
   
 // Return Portal to Nexus (Magic World)
 const returnPortal = new THREE.Mesh(
