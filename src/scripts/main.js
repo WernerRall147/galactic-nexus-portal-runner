@@ -1,5 +1,5 @@
 import * as THREE from 'https://esm.sh/three';
-import { createMagicScene } from './magicWorld.js';
+import { createCombatScene } from './combatWorld.js';
 
 let currentScene = "nexus";
 
@@ -15,7 +15,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.innerHTML = '';
 document.body.appendChild(renderer.domElement);
 
-createMagicScene(renderer);
+createCombatScene(renderer);
 
 // Lighting setup
 scene.add(new THREE.AmbientLight(0xffffff, 0.5));
