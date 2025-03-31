@@ -17,6 +17,23 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.innerHTML = '';
 document.body.appendChild(renderer.domElement);
 
+// ===== CLEARLY ADD YOUR SKYBOX SETUP HERE =====
+function createSkybox(scene) {
+  const loader = new THREE.CubeTextureLoader();
+  const texture = loader.load([
+    './assets/textures/skymap_posx_1024x1024.jpg',
+    './assets/textures/skymap_negx_1024x1024.jpg',
+    './assets/textures/skymap_posy_1024x1024.jpg',
+    './assets/textures/skymap_negy_1024x1024.jpg',
+    './assets/textures/skymap_posz_1024x1024.jpg',
+    './assets/textures/skymap_negz_1024x1024.jpg',
+  ]);
+
+  scene.background = texture;
+}
+
+createSkybox(scene);
+
 // Lighting setup
 scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -31,19 +48,30 @@ player.position.y = 1;
 scene.add(player);
 
 // Ground plane
-const floorGeometry = new THREE.PlaneGeometry(50, 50);
+const floorGeometry = new THREE.PlaneGeometry(15, 15);
 const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.rotation.x = -Math.PI / 2;
 scene.add(floor);
 
-// Nexus platform
+// Smaller, advanced-tech style Nexus platform
 const nexusPlatform = new THREE.Mesh(
-  new THREE.CylinderGeometry(5, 5, 0.2, 32),
-  new THREE.MeshStandardMaterial({ color: 0x4444aa, emissive: 0x111133 })
+  new THREE.CylinderGeometry(2.5, 2.5, 0.3, 32), // Reduced radius, increased thickness
+  new THREE.MeshStandardMaterial({ 
+    color: 0x222244,          // Darker, sophisticated color
+    emissive: 0x5555ff,       // Clear, advanced-tech style emissive glow
+    emissiveIntensity: 0.3,   // Subtle, not overwhelming glow
+    metalness: 0.6,           // Slight metallic appearance
+    roughness: 0.2            // Smooth, polished surface
+  })
 );
-nexusPlatform.position.y = 0.1;
+nexusPlatform.position.y = 0.15; // Slightly higher due to increased thickness
 scene.add(nexusPlatform);
+
+// Clearly animate Nexus platform rotation
+function rotateNexusPlatform() {
+  nexusPlatform.rotation.y += 0.001; // Very slow, smooth rotation
+}
 
 // Central artifact
 const centralArtifact = new THREE.Mesh(
@@ -135,17 +163,6 @@ function checkVibeversePortal() {
   }
 }
 
-function animate() {
-  if (currentScene === "nexus") {
-    requestAnimationFrame(animate);
-    updatePlayer();
-    rotateArtifact();
-    renderer.render(scene, camera);
-  }
-}
-
-animate();
-
 // Scene switching functions
 function switchToRacingWorld() {
   currentScene = "racing";
@@ -167,3 +184,17 @@ function switchToCombatWorld() {
   document.body.appendChild(renderer.domElement);
   createCombatScene(renderer);
 }
+
+function animate() {
+  if (currentScene === "nexus") {
+    requestAnimationFrame(animate);
+    updatePlayer();
+    rotateArtifact();
+    rotateNexusPlatform(); // Added clearly here
+    renderer.render(scene, camera);
+  }
+}
+
+animate();
+
+
